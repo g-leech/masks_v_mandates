@@ -6,13 +6,26 @@ import numpy as np
 import pymc3 as pm
 import seaborn as sns
 
-import epimodel.pymc3_models.base_model as bm
-
 sns.set_style("white")
 
 
 def month_to_str(i):
     return calendar.month_name[i]
+
+
+def produce_CIs(array):
+    """
+    Produce 95%, 50% Confidence intervals from a Numpy array, taking CIs using the 0th axis.
+    :param array: Numpy array from which to compute CIs.
+    :return: (median, 2.5 percentile, 97.5 percentile, 25th percentile, 75th percentile) tuple.
+    """
+    m = np.median(array, axis=0)
+    li = np.percentile(array, 2.5, axis=0)
+    ui = np.percentile(array, 97.5, axis=0)
+    uq = np.percentile(array, 75, axis=0)
+    lq = np.percentile(array, 25, axis=0)
+
+    return m, li, ui, lq, uq
 
 
 def get_predictions(trace, r_i):
@@ -23,7 +36,7 @@ def get_predictions(trace, r_i):
     dist = pm.NegativeBinomial.dist(mu=c, alpha=noise)
     output = dist.random()
 
-    means_expected_cases, l, u, _, _ = bm.produce_CIs(output)
+    means_expected_cases, l, u, _, _ = produce_CIs(output)
 
     return means_expected_cases, l, u
 
@@ -72,18 +85,6 @@ def plot_actuals(data, full_data, r_i, ax):
     )
 
 
-#     ax.set_yscale("log")
-#     #plt.ylim([10 ** 0, 10 ** 6])
-#     locs = np.arange(start_d_i, end_d_i, 14)
-# #     xlabels = [f"{data.Ds[ts].day}-{month_to_str(data.Ds[ts].month)}" for ts in locs]
-# #     plt.xticks(locs, xlabels, rotation=-30, ha="left")
-# #     plt.xlim((start_d_i, end_d_i))
-#     ax=plt.gca()
-#     #bm.add_cms_to_plot(ax, data.ActiveCMs, r_i, start_d_i, end_d_i, data.Ds, cm_plot_style)
-#     plt.title(region, fontsize=12)
-#     return ax
-
-
 def epicurve_plot(data, oxcgrt, trace, region, ax=None):
     if not ax:
         fig, ax = plt.subplots(figsize=(8,5), dpi=500)
@@ -94,7 +95,5 @@ def epicurve_plot(data, oxcgrt, trace, region, ax=None):
     plot_actuals(data, oxcgrt, r_i, ax)
 
     ax.set_yscale("log")
-    # bm.add_cms_to_plot(ax, data.ActiveCMs, r_i, start_d_i, end_d_i, data.Ds, cm_plot_style)
     ax.set_title(region, fontsize=12)
     ax.legend(fontsize=10)
-    #plt.show()

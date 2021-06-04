@@ -1,5 +1,7 @@
 # Code and data for Leech et al (2021), "Mass mask-wearing is associated with reduced COVID-19 transmission"
 
+## Linux
+
 ### Installation
 
 1. `git clone https://github.com/g-leech/masks_v_mandates.git`
@@ -23,7 +25,7 @@
 After about 6 hours, this will produce two posterior traces in `notebooks/pickles` which can be loaded and visualised with [model_check_and_viz](https://github.com/g-leech/masks-npis/blob/sensitivity_analysis/notebooks/model_check_and_viz.ipynb), changing the filenames in `Load pickles`.
 
 
-### Datasets
+## Datasets
 
 The data used is from the following sources.
 

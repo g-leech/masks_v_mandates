@@ -1,0 +1,243 @@
+default:
+  experiment_file: default.py
+  experiment_tag: default
+  args: {}
+
+#basic_R_prior_mean:
+#  experiment_file: basic_R_prior.py
+#  experiment_tag: basic_R_prior_mean
+#  args:
+#    basic_R_scale:
+#      - 0.5
+#    basic_R_mean:
+#      - 1.0
+#      - 1.1
+#      - 1.2
+#      - 1.3
+#      - 1.4
+
+#basic_R_prior_scale:
+#  experiment_file: basic_R_prior.py
+#  experiment_tag: basic_R_prior_scale
+#  args:
+#    basic_R_scale:
+#      - 0.3
+#      - 0.4
+##      - 0.5
+#      - 0.6
+#      - 0.7
+#    basic_R_mean:
+#      - 1.07
+
+
+basic_R_hyperprior_mean_mean:
+  experiment_file: basic_R_mean_hyperprior.py
+  experiment_tag: basic_R_hyperprior_mean_mean
+  args:
+    R_prior_mean_mean:
+      - 1.0
+      - 1.2
+      - 1.3
+    R_prior_mean_scale:
+      - 0.2
+    R_noise_scale:
+      - 0.4
+
+basic_R_hyperprior_mean_scale:
+  experiment_file: basic_R_mean_hyperprior.py
+  experiment_tag: basic_R_hyperprior_mean_scale
+  args:
+    R_prior_mean_mean:
+      - 1.07
+    R_prior_mean_scale:
+      - 0.15
+      - 0.3
+    R_noise_scale:
+      - 0.4
+
+basic_R_prior_scale:
+  experiment_file: basic_R_mean_hyperprior.py
+  experiment_tag: basic_R_prior_scale
+  args:
+    R_prior_mean_mean:
+      - 1.07
+    R_prior_mean_scale:
+      - 0.2
+    R_noise_scale:
+      - 0.3
+      - 0.5
+
+cases_delay_mean:
+  experiment_file: epiparam_mean.py
+  experiment_tag: cases_delay_mean
+  args:
+    cases_delay_mean:
+      - 10.
+      - 12.
+    gen_int_mean:
+      - 5.06
+
+gen_int_mean:
+  experiment_file: epiparam_mean.py
+  experiment_tag: gen_int_mean
+  args:
+    cases_delay_mean:
+      - 10.92
+    gen_int_mean:
+      - 4.
+      - 6.
+
+intervention_prior:
+  experiment_file: intervention_prior.py
+  experiment_tag: intervention_prior
+  args:
+    intervention_prior:
+      - AL 20.
+      - normal 0.15
+
+npi_leaveout:
+  experiment_file: npi_leaveout.py
+  experiment_tag: npi_leaveout
+  args:
+    npis:
+      - [0]
+      - [1]
+      - [2]
+      - [3]
+      - [4]
+      - [5]
+      - [6]
+      - [7]
+      - [8]
+
+
+r_walk_noise_scale_prior:
+  experiment_file: r_walk_noise_scale_prior.py
+  experiment_tag: r_walk_noise_scale_prior
+  args:
+    r_walk_noise_scale_prior:
+      - 0.05
+      - 0.1
+      - 0.2
+      - 0.25
+
+r_walk_period:
+  experiment_file: r_walk_period.py
+  experiment_tag: r_walk_period
+  args:
+    r_walk_period:
+      - 5
+      - 9
+      - 11
+
+bootstrap:
+  experiment_file: bootstrap.py
+  experiment_tag: boostrap
+  args:
+    seed: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+wearing_parameterisation:
+  experiment_file: wearing_parameterisation.py
+  experiment_tag: wearing_parameterisation
+  args:
+    wearing_parameterisation:
+      - 'log_quadratic_2'
+      - 'log_linear'
+
+wearing_prior_scale:
+  experiment_file: wearing_prior_scale.py
+  experiment_tag: wearing_prior_scale
+  args:
+    wearing_sigma:
+      - 0.3
+#      - 0.4
+      - 0.5
+
+mobility_sigma:
+  experiment_file: mobility_sigma.py
+  experiment_tag: mobility_sigma
+  args:
+    mobility_sigma:
+      - 0.35
+      - 0.4
+#      - 0.45
+      - 0.5
+      - 0.55
+
+mobility_mean:
+  experiment_file: mobility_mean.py
+  experiment_tag: mobility_mean
+  args:
+    mobility_mean:
+      - 1.5
+#      - 1.7
+      - 2.0
+
+mask_sigma:
+  experiment_file: mask_sigma.py
+  experiment_tag: mask_sigma
+  args:
+    mask_sigma:
+      - 0.2
+      - 0.05
+      - 0.4
+
+cases_delay_disp_mean:
+  experiment_file: cases_delay_disp_mean.py
+  experiment_tag: cases_delay_disp_mean
+  args:
+    cases_delay_disp_mean:
+      - 3
+      - 4
+      - 6
+      - 7
+
+mask_leave_on:
+  experiment_file: mask_leave_on.py
+  experiment_tag: mask_leave_on
+  args:
+    mask_leave_on:
+      - True
+
+mobility_leaveout:
+  experiment_file: mobility_leaveout.py
+  experiment_tag: mobility_leaveout
+  args:
+    mobility_leaveout:
+      - True
+
+mob_and_wearing_only:
+  experiment_file: mob_and_wearing_only.py
+  experiment_tag: mob_and_wearing_only
+  args:
+    mob_and_wearing_only:
+      - True
+
+fake_wearing_npi:
+  experiment_file: fake_wearing_npi.py
+  experiment_tag: fake_wearing_npi
+  args:
+    fake_wearing_npi:
+      - True
+
+mask_thresholds:
+  experiment_file: mask_thresholds.py
+  experiment_tag: mask_thresholds
+  args:
+    n_mandates:
+      - 1
+
+window_of_analysis:
+  experiment_file: window_of_analysis.py
+  experiment_tag: window_of_analysis
+  args:
+    new_dates:
+      - ['2020-05-01', '2020-09-01']
+      - ['2020-06-01', '2020-09-21']
+
+#everything_normalised:
+#  experiment_file: everything_normalised.py
+#  experiment_tag: everything_normalised
+#  args:
+#    everything_normalised:
+#      - True

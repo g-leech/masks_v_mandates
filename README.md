@@ -29,12 +29,11 @@ cd ../..
 
 1. `poetry shell`
 2. `python scripts/produce_master_model_data.py`
-4. `cd notebooks`
-5. `mkdir pickles`
-5. `python3 main_model_runner.py --model="cases" --masks="wearing" --mob="include"`
-6. `python3 main_model_runner.py --model="cases" --masks="mandate" --mob="include"`
+3. `mkdir pickles`
+5. `python3 scripts/main_model_runner.py --model="cases" --masks="wearing" --mob="include"`
+6. `python3 scripts/main_model_runner.py --model="cases" --masks="mandate" --mob="include"`
 
-After about 6 hours, this will produce two posterior traces in `notebooks/pickles` which can be loaded and visualised with [model_check_and_viz](https://github.com/g-leech/masks-npis/blob/sensitivity_analysis/notebooks/model_check_and_viz.ipynb), changing the filenames in `Load pickles`.
+After about 6 hours, this will produce two posterior traces in `pickles` which can be loaded and visualised with [model_check_and_viz](https://github.com/g-leech/masks-npis/blob/sensitivity_analysis/notebooks/model_check_and_viz.ipynb), changing the filenames in `Load pickles`.
 
 
 ## Datasets

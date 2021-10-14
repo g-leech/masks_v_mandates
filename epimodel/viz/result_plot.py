@@ -19,7 +19,7 @@ def main_result_posteriors(m, w, ax):
     if type(wred[0]) == np.ndarray:
         wred = [x[0] for x in wred]
     
-    sns.kdeplot(wred, label="wearing (0-100%)", shade=True, ax=ax)
+    sns.kdeplot(wred, label="wearing", shade=True, ax=ax)
 
     mred = m.MandateReduction 
     mred = transform(mred)
@@ -28,7 +28,8 @@ def main_result_posteriors(m, w, ax):
     
     sns.kdeplot(mred, label="mandate", color="green", shade=True, ax=ax)
     ax.axvline(x=0, color="black", linestyle="--")
-    ax.set_xlabel("Inferred % reduction in R", fontsize=10)
+    ax.set_xlabel("% R reduction\n(entire population masked)", fontsize=10)
+    ax.set_ylabel("Posterior density", fontsize=10)
     ax.set_xlim(-20, 60)
     plt.yticks(fontsize=8)
     plt.xticks(fontsize=8)

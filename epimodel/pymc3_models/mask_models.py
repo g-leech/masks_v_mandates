@@ -273,7 +273,7 @@ class RandomWalkMobilityModel(pm.Model):
                     T.nnet.relu(1.0 - T.sum(self.ActiveCMReduction_wearing, axis=1))
                     + eps
                 )
-            # TODO: take out these reshapes. Can just add an axis manually.
+            
             if wearing_parameterisation == "log_quadratic_2":
                 self.ActiveCMReduction_wearing = (
                     T.reshape(self.Wearing_Alpha[0], (1, 1, 1))

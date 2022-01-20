@@ -10,6 +10,7 @@ from pathlib import Path
 import arviz as az
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -53,11 +54,12 @@ def reprod_plot(
     if not ax :
         ax = plt.gca()
     
-    add_rt_plot(ax, r, r_i, trace, data, start_d_i, cis)
+    add_rt_plot(ax, r, r_i, trace, data, start_d_i, cis, ylim=True)
     ax.set_xlim(Ds[0], Ds[-20])
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(fmt)
     ax.axes.get_xaxis().set_visible(False)
+    ax.set_yscale('log')
 
     plt.subplot(4, 3, 2)
     ax = plt.gca()
@@ -70,6 +72,7 @@ def reprod_plot(
     add_cases_to_plot(ax, r_i, data)
     ax.set_xlim(Ds[0], Ds[-20])
     ax.axes.get_xaxis().set_visible(False)
+    ax.set_yscale('log')
 
     plt.subplot(4, 3, 5)
     ax = plt.gca()
@@ -95,9 +98,62 @@ def reprod_plot(
         ax = plt.gca()
         add_third_party_rt(ax, third_party_rts, r, Ds)
         ax.set_xlim(Ds[0], Ds[-20])
+        ax.set_yscale('log')
 
     plt.tight_layout()
 
+    
+def mask_effect_plot_per_region(trace, data, r, start_d_i=0, cis=True):
+    r_i = data.Rs.index(r)
+    data.Ds = pd.to_datetime(data.Ds)
+    Ds = data.Ds
+    
+    fig = plt.figure(figsize=(7, 6), dpi=300, constrained_layout=False)
+    ax = fig.add_axes([0.1, 1.5, 0.8, 0.4])
+    ax2 = fig.add_axes([0.1, 1, 0.8, 0.4])
+    
+    add_wearing_to_plot(ax, r_i, data, s=16)
+    ax.set_xlim(Ds[0], Ds[-25])
+    ax.set_title(r +"\n", fontsize=18)
+    ax.axes.get_xaxis().set_visible(False)
+    
+    add_rt_masks_and_not(ax2, r, r_i, trace, data, start_d_i, cis=False, ylim=False)
+
+
+def add_rt_masks_and_not(ax, r, r_i, trace, data, start_i, cis=True, ylim=True):
+    data.Ds = pd.to_datetime(data.Ds)
+    Ds = data.Ds
+    end_i = get_end_ind(data, r_i)
+
+    rs = get_rt(trace, data, r_i=r_i)
+    rs_without_masks = get_rt_sans_masks(trace, data, r_i)
+
+    mns, lu, up = percentiles_rt(data, r_i, start_i, end_i, rs)
+    ax.plot(Ds[0:-25], mns[0:-25], color=cols[0], label="masks")
+    
+    mns, lu, up = percentiles_rt(data, r_i, start_i, end_i, rs_without_masks)
+    ax.plot(Ds[0:-25], mns[0:-25], label="no masks")
+    
+    if cis:
+        ax.fill_between(Ds[0:-20], lu[0:-20], up[0:-20], alpha=0.25, linewidth=0)
+
+    if ylim :
+        plt.ylim([0.5, 1.7])
+    
+    ax.set_ylabel("Estimated $R_t$ (log)", fontsize=16)
+
+    ax.axhline([1], color=cols[1], linestyle="--")    
+    
+    ax.set_xlim(Ds[0], Ds[-25])
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(fmt)
+    # ax2.axes.get_xaxis().set_visible(False)
+    ax.set_yscale('log')
+    ax.yaxis.set_minor_formatter(mticker.ScalarFormatter())
+    
+    ax.legend()
+
+    
 
 def add_random_walks(ax, ms, r_i):
     mr = ms[r_i, :]
@@ -176,7 +232,7 @@ def add_cases_to_plot(ax, r_i, data):
 
     # ax2 = ax.twinx()
     ax.plot(Ds, cases, alpha=0.55, label="cases", color="blue")
-    ax.set_ylabel("cases", fontsize=10)
+    ax.set_ylabel("log cases", fontsize=10)
     ax.set_xlim([Ds[0], Ds[-1]])
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(fmt)
@@ -200,8 +256,19 @@ def add_gnoise_to_plot(ax, trace, r_i, Ds):
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(fmt)
 
+    
+def percentiles_rt(data, r_i, start_i, end_i, rs):
+    end_i = get_end_ind(data, r_i)
+    Ds = pd.to_datetime(data.Ds)
+    start_d = Ds[start_i]
+    end_d = Ds[end_i]
+    mns, lu, up, _, _ = produce_CIs(rs)
+    
+    return mns, lu, up
 
-def add_rt_plot(ax, r, r_i, trace, data, start_i, cis=True):
+    
+
+def add_rt_plot(ax, r, r_i, trace, data, start_i, cis=True, ylim=True):
     rs = get_rt(trace, data, r_i=r_i)
 
     end_i = get_end_ind(data, r_i)
@@ -212,19 +279,57 @@ def add_rt_plot(ax, r, r_i, trace, data, start_i, cis=True):
 
     plt.title(r, fontsize=12)
 
-    ax.plot(Ds[10:-20], mns[10:-20], color=cols[0], label="R")
-    ax.tick_params(axis="y", colors=cols[0])
+    ax.plot(Ds[0:-20], mns[0:-20], color=cols[0], label="R")
+    #ax.tick_params(axis="y")
 
     if cis:
-        plt.fill_between(Ds[10:-20], lu[10:-20], up[10:-20], alpha=0.25, linewidth=0)
+        ax.fill_between(Ds[0:-20], lu[0:-20], up[0:-20], alpha=0.25, linewidth=0)
 
-    plt.xlim((start_d, end_d))
-    plt.ylim([0.5, 1.5])
-    plt.ylabel("Estimated $R_t$", fontsize=10)
+    #plt.xlim((start_d, end_d))
+    if ylim :
+        plt.ylim([0.5, 1.7])
+    ax.set_ylabel("Estimated $R_t$ (log)", fontsize=10)
 
-    ax.plot([start_d, end_d], [1, 1], color=cols[1], linestyle="--")
+    #ax.plot([start_d, end_d], [1, 1], color=cols[1], linestyle="--")
+    ax.axhline([1], color=cols[1], linestyle="--")
 
     #ax3 = add_cms_to_plot(ax, data, r_i, start_i, end_i)
+
+    
+def add_rt_minus_masks(ax, r, r_i, trace, data, start_i, cis=True, ylim=True):
+    rs_without_masks = get_rt_sans_masks(trace, data, r_i)
+
+    end_i = get_end_ind(data, r_i)
+    Ds = pd.to_datetime(data.Ds)
+    start_d = Ds[start_i]
+    end_d = Ds[end_i]
+    mns, lu, up, _, _ = produce_CIs(rs_without_masks)
+
+    ax.plot(Ds[0:-20], mns[0:-20], color=cols[0], label="R")
+    #ax.tick_params(axis="y")
+
+    if cis:
+        plt.fill_between(Ds[0:-20], lu[0:-20], up[0:-20], alpha=0.25, linewidth=0)
+
+    plt.xlim((start_d, end_d))
+    if ylim:
+        plt.ylim([0.5, 1.7])
+    plt.ylabel("$R_t$ (log) without masks", fontsize=10)
+
+    ax.axhline([1], color=cols[1], linestyle="--")
+    
+
+# Adding it back on after subtraction here
+# https://github.com/g-leech/masks_v_mandates/blob/main/epimodel/pymc3_models/mask_models.py#L354
+def get_rt_sans_masks(trace, data, r_i=0):
+    nS, nCMs = trace.CM_Alpha.shape
+    nDs = len(data.Ds)
+    elogr = trace.ExpectedLogR
+    masks = trace.growth_reduction_wearing
+    expectedr = np.exp(elogr + masks)
+
+    return expectedr[:, r_i, :].reshape((nS, nDs))
+
 
 
 def add_preds(ax, trace, data, r_i):
@@ -246,7 +351,7 @@ def add_third_party_rt(ax, third_party_rts, r, Ds):
     #ul = rts.upper_80[10:-20]
     ds = rts.date.unique()
     plt.xlim(ds[0], ds[-1])
-    plt.ylim(0.5, 1.5)
+    plt.ylim(0.5, 1.7)
     
     ds = ds[10:-20]
 
@@ -376,14 +481,14 @@ cm_plot_style = {
 }
 
 
-def add_wearing_to_plot(ax, r_i, data):
+def add_wearing_to_plot(ax, r_i, data, s=10):
     wi = data.CMs.index("percent_mc")
     wearing = data.ActiveCMs[r_i, wi, :]
 
     # ax2 = ax.twinx()
     ax.plot(data.Ds, wearing, alpha=0.55, label="wearing", color="blue")
     ax.set_ylim([0, 1])
-    ax.set_ylabel("% wearing", fontsize=10)
+    ax.set_ylabel("% wearing", fontsize=s)
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(fmt)
 

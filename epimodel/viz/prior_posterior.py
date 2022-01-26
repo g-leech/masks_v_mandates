@@ -42,14 +42,26 @@ def plot_all_pps(trace):
 
         prior_posterior_plot(mr.trace.HyperRVar, trace.HyperRVar, t="R0 hyperprior scale", ax=axes[0][1])
 
-    if "r_walk_noise_scale" in trace.varnames:
-        with pm.Model() as m:
-            pm.HalfNormal("r_walk_noise_scale", 0.15)
-            m.trace = pm.sample(n)
-
-        prior_posterior_plot(
-            m.trace.r_walk_noise_scale, trace.r_walk_noise_scale, t="r_walk_noise_scale", ax=axes[0][2]
+    
+    # Pushforward distribution (sample from hyperprior, then plot density of resulting prior)
+    with pm.Model() as mm:
+        R_prior_mean_mean=1.07
+        R_prior_mean_scale=0.4
+        HyperRMean = pm.TruncatedNormal(
+            "HyperRMean", mu=R_prior_mean_mean, sigma=R_prior_mean_scale, lower=0.1
         )
+
+        HyperRVar = pm.HalfNormal("HyperRVar", sigma=0.3)
+
+        RegionR_noise = pm.Normal("RegionR_noise", 0, 1, shape=(92,))
+        RegionR = pm.Deterministic(
+                    "RegionR", HyperRMean + RegionR_noise * HyperRVar
+                )
+
+        mm.trace = pm.sample(45000)
+        
+    prior_posterior_plot(mm.trace.RegionR, trace.RegionR, t="R0 prior", ax=axes[0][2]
+                           )
 
     # GI
     with pm.Model() as mg:
@@ -57,12 +69,14 @@ def plot_all_pps(trace):
         mg.trace = pm.sample(n)
 
     prior_posterior_plot(mg.trace.GI_mean, trace.GI_mean, t="GI mean", ax=axes[1][0])
+    axes[1][0].set_xlabel("days")
     
     with pm.Model() as mgd:
         pm.Normal("GI_sd", 2, 1)
         mgd.trace = pm.sample(n)
 
     prior_posterior_plot(mgd.trace.GI_sd, trace.GI_sd, t="GI sd", ax=axes[1][1])
+    axes[1][1].set_xlabel("days")
 
     # Psi
 
@@ -90,6 +104,7 @@ def plot_all_pps(trace):
     prior_posterior_plot(wred, wred_post, \
                          t="Mask effect (100% wearing)", ax=axes[2][0])
     axes[2][0].set_xlim(-100, 100)
+    axes[2][0].set_xlabel("% reduction in R")
     
     priors, posts, title = plot_npi_prior_effect(trace, axes[2][1], combined=True)
     prior_posterior_plot(priors, posts, t=title, ax=axes[2][1])
@@ -104,7 +119,13 @@ def plot_all_pps(trace):
     handles.extend([prior,post])
     axes[0][0].legend(handles=handles, frameon=False, loc="upper right", fontsize=6)
     
-    axes[2][2].axis('off')
+    if "r_walk_noise_scale" in trace.varnames:
+        with pm.Model() as m:
+            pm.HalfNormal("r_walk_noise_scale", 0.15)
+            m.trace = pm.sample(n)
+
+        prior_posterior_plot(m.trace.r_walk_noise_scale, trace.r_walk_noise_scale, t="r_walk_noise_scale", ax=axes[2][2])
+    
     plt.tight_layout()
     
 
@@ -136,5 +157,6 @@ def plot_npi_prior_effect(trace, ax, combined=False):
         pct_reduction_ = pct_reduction.sum(axis=1)
         pct_reduction_post = pct_reduction_post.sum(axis=1)
         title = "NPI effect (total)"
+        ax.set_xlabel("% reduction in R")
     
     return pct_reduction, pct_reduction_post, title

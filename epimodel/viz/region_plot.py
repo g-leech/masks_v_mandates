@@ -117,7 +117,7 @@ def mask_effect_plot_per_region(trace, data, r, start_d_i=0, cis=True):
     ax.set_title(r +"\n", fontsize=18)
     ax.axes.get_xaxis().set_visible(False)
     
-    add_rt_masks_and_not(ax2, r, r_i, trace, data, start_d_i, cis=False, ylim=False)
+    add_rt_masks_and_not(ax2, r, r_i, trace, data, start_d_i, cis=cis, ylim=False)
 
 
 def add_rt_masks_and_not(ax, r, r_i, trace, data, start_i, cis=True, ylim=True):
@@ -129,14 +129,16 @@ def add_rt_masks_and_not(ax, r, r_i, trace, data, start_i, cis=True, ylim=True):
     rs_without_masks = get_rt_sans_masks(trace, data, r_i)
 
     mns, lu, up = percentiles_rt(data, r_i, start_i, end_i, rs)
-    ax.plot(Ds[0:-25], mns[0:-25], color=cols[0], label="masks")
     
-    mns, lu, up = percentiles_rt(data, r_i, start_i, end_i, rs_without_masks)
-    ax.plot(Ds[0:-25], mns[0:-25], label="no masks")
+    mns_wo, lu_wo, up_wo = percentiles_rt(data, r_i, start_i, end_i, rs_without_masks)
+    
     
     if cis:
-        ax.fill_between(Ds[0:-20], lu[0:-20], up[0:-20], alpha=0.25, linewidth=0)
-
+        ax.fill_between(Ds[0:-20], lu[0:-20], up[0:-20], alpha=0.25, color=cols[2], linewidth=0, label="masks")
+        ax.fill_between(Ds[0:-20], lu_wo[0:-20], up_wo[0:-20], alpha=0.25, color=cols[0],linewidth=0, label="no masks")
+    else:
+        ax.plot(Ds[0:-25], mns[0:-25], color=cols[0], label="no masks")
+        ax.plot(Ds[0:-25], mns[0:-25], color=cols[1], label="masks")
     if ylim :
         plt.ylim([0.5, 1.7])
     
@@ -486,8 +488,8 @@ def add_wearing_to_plot(ax, r_i, data, s=10):
     wearing = data.ActiveCMs[r_i, wi, :]
 
     # ax2 = ax.twinx()
-    ax.plot(data.Ds, wearing, alpha=0.55, label="wearing", color="blue")
-    ax.set_ylim([0, 1])
+    ax.plot(data.Ds, wearing * 100, alpha=0.55, label="wearing", color="blue")
+    ax.set_ylim([0, 100])
     ax.set_ylabel("% wearing", fontsize=s)
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(fmt)
